@@ -7,6 +7,7 @@ use Illuminate\Support\ServiceProvider;
 use OptimistDigital\NovaSettings\Http\Middleware\Authorize;
 use OptimistDigital\NovaSettings\Http\Middleware\SettingsPathExists;
 use OptimistDigital\NovaTranslationsLoader\LoadsNovaTranslations;
+use Laravel\Nova\Events\ServingNova;
 
 class NovaSettingsServiceProvider extends ServiceProvider
 {
@@ -34,6 +35,15 @@ class NovaSettingsServiceProvider extends ServiceProvider
                 __DIR__ . '/../config/' => config_path(),
             ], 'config');
         }
+        
+        Nova::serving(ServingNova $event) {
+            $locale = null;
+            
+            if(auth()->check()) 
+                $locale = auth()->user()->id . '.locale';
+            
+            app()->setLocale($locale ?? app()->getLocale());
+        });
     }
 
     public function register()
